@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="Alarm" Id="{932c3d0e-2727-4df8-a543-2fcb77ec2390}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Alarm
+VAR_INPUT
+	AlarmID : TcEventEntry;
+	bRaiseAlarm : BOOL :=0;
+	bConfirmAlarm : BOOL := 0;
+    bClearAlarm : BOOL := 0;
+	
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	
+	bRaise : BOOL :=0;	
+	bIsInitalized : BOOL :=0;
+	nTimeStamp : ULINT := 0;
+	fbAlarm : FB_TcALarm;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Initalize();
+RaiseAlarm();
+ConfirmAlarm();
+ClearAlarm();
+//ClearLoggedEvent();]]></ST>
+    </Implementation>
+    <Method Name="ClearAlarm" Id="{e65c0889-fc79-4575-a092-b103c2499371}">
+      <Declaration><![CDATA[METHOD ClearAlarm : BOOL
+VAR
+	bClearALL : BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bclearALL := MAIN.clearAlarms;
+IF NOT bRaiseAlarm THEN //
+	IF bClearAlarm OR bClearALL THEN	
+		fbAlarm.Clear(nTimeStamp, FALSE);
+	END_IF
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ConfirmAlarm" Id="{1c299cc1-8493-47ab-899e-77d00fb9db6e}">
+      <Declaration><![CDATA[METHOD ConfirmAlarm : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bConfirmAlarm THEN
+	fbAlarm.Confirm(nTimeStamp);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Initalize" Id="{499d5f32-1024-45e3-9670-9fed37dd6955}">
+      <Declaration><![CDATA[METHOD Initalize : BOOL
+VAR
+	fbSourceInfo : FB_TcSourceInfo;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bIsInitalized THEN
+	bIsInitalized := TRUE;
+	//fbSourceInfo.sName := UDINT_TO_STRING(AlarmID.nEventId);
+	fbAlarm.CreateEx(AlarmID, TRUE, fbSourceInfo);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="RaiseAlarm" Id="{e9f9ffd9-7208-4880-afdc-5e984eeac151}">
+      <Declaration><![CDATA[METHOD RaiseAlarm : BOOL
+VAR
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bRaise := bRaiseAlarm;
+IF bRaise THEN
+	fbAlarm.Raise(nTimeStamp);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="Alarm">
+      <LineId Id="36" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="56" Count="0" />
+    </LineIds>
+    <LineIds Name="Alarm.ClearAlarm">
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+    <LineIds Name="Alarm.ConfirmAlarm">
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Alarm.Initalize">
+      <LineId Id="6" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Alarm.RaiseAlarm">
+      <LineId Id="11" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

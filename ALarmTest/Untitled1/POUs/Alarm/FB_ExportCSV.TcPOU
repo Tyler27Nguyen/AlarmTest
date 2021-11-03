@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="FB_ExportCSV" Id="{2803cd03-f8cf-4705-b3e1-f7317ef61984}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM FB_ExportCSV
+VAR_INPUT
+	bExport				: BOOL;
+END_VAR
+
+VAR
+	hr : HRESULT;
+	
+	fbCsvExportSetting	: FB_TcEventCsvExportSettings; 
+	fbExportFilter		: I_TcEventFilter; 
+	sExportFilePath		: T_maxString := 'C:\dataCollection\';
+	sExportFileName		: T_maxString := 'Alarms_History.csv';
+	
+	fbEventLogger	: FB_TcEventLogger;
+	fbTrig			: R_TRIG;
+	
+	getTime : FB_LocalSystemTime := ( bEnable := TRUE, dwCycle := 5 );
+	dateStr : T_MaxString;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[getTime();
+fbTrig(CLK:=bExport);
+IF bExport THEN
+	IF fbTrig.Q THEN 
+		dateStr := getDateStr();
+		sExportFileName	:= Concat(Concat(sExportFilePath,'Alarms_History_'),Concat(dateStr,'.csv'));
+		fbCsvExportSetting.Clear();
+		fbCsvExportSetting.sDelimiter := ',' ;
+		//fbCsvExportSetting.AddLanguage(1031, 'German');
+		fbCsvExportSetting.AddFilter(fbExportFilter); 
+		//fbExportFilter.Clear().IsMessage().AND_OP().EventClass.EqualTo(TC_EVENTS.Alarm.Event.uuidEventClass);
+	END_IF
+	IF fbEventLogger.ExportLoggedEvents(sExportFileName, fbCsvExportSetting, hrErrorCode=>hr) THEN // async request returns TRUE if not any more busy 
+		bExport := FALSE;
+	END_IF
+END_IF
+]]></ST>
+    </Implementation>
+    <Method Name="getDateStr" Id="{e57e5c5d-98ed-499d-a978-808d7703ecac}">
+      <Declaration><![CDATA[METHOD getDateStr : T_MaxString
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[getDateStr := CONCAT(WORD_TO_STRING(getTime.systemTime.wMonth), CONCAT('_', CONCAT(WORD_TO_STRING(getTime.systemTime.wDay), CONCAT('_', WORD_TO_STRING(getTime.systemTime.wYear)))));]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_ExportCSV">
+      <LineId Id="63" Count="0" />
+      <LineId Id="16" Count="2" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="20" Count="7" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ExportCSV.getDateStr">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
